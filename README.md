@@ -1,7 +1,5 @@
 # Next-Day Wildfire Spread Prediction
 
-SE4050 — Deep Learning, BSc (Hons) in Information Technology, 2026
-
 Predicting next-day wildfire spread as a pixel-wise binary segmentation task, using four deep-learning architectures trained and evaluated under identical, fair experimental conditions.
 
 ## Team
