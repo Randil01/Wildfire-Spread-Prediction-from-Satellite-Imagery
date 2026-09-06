@@ -88,7 +88,7 @@ raw_dataset = tf.data.TFRecordDataset('data/next_day_wildfire_spread_train_00.tf
 parsed_dataset = raw_dataset.map(parse_fn)
 ```
 
-The shared `shared/preprocessing.py` module wraps this into ready-to-use PyTorch `DataLoader` objects with the fixed train/val/test split, normalization, NaN handling, augmentation, and class-imbalance weight already applied. Every member should import `get_dataloaders()` from this module rather than writing their own loader. See [models/README.md](models/README.md) for the model implementation contract.
+The shared `shared/preprocessing.ipynb` notebook wraps this into ready-to-use PyTorch `DataLoader` objects with the fixed train/val/test split, normalization, NaN handling, augmentation, and class-imbalance weight already applied. Every model notebook must run this shared notebook rather than writing its own loader. See [models/README.md](models/README.md) for the model implementation contract.
 
 ## Repo structure
 
@@ -96,14 +96,14 @@ The shared `shared/preprocessing.py` module wraps this into ready-to-use PyTorch
 wildfire-prediction/
 ├── data                       # downloaded TFRecords (gitignored)
 ├── shared/
-│   ├── preprocessing.py       # shared Dataset/DataLoader and preprocessing
+│   ├── preprocessing.ipynb     # shared Dataset/DataLoader and preprocessing
 │   └── normalization_stats.json # shared training-set statistics
 ├── models/
 │   ├── README.md              # model implementation instructions
-│   ├── cnn_baseline           # Member 1
-│   ├── unet                   # Member 2
-│   ├── resnet_unet            # Member 3
-│   └── attention_unet         # Member 4
+│   ├── cnn_baseline.ipynb      # Member 1
+│   ├── unet.ipynb              # Member 2
+│   ├── resnet_unet.ipynb       # Member 3
+│   └── attention_unet.ipynb    # Member 4
 ├── requirment.txt             # Python dependencies
 └── README.md
 ```

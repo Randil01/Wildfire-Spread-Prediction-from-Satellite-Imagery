@@ -1,29 +1,28 @@
 # Model Implementation Instructions
 
-Each model must use the shared preprocessing pipeline. This keeps the train, validation, and test data identical across the CNN, U-Net, ResNet-UNet, and Attention U-Net experiments.
+Each model notebook must use the shared preprocessing notebook. This keeps the train, validation, and test data identical across the CNN, U-Net, ResNet-UNet, and Attention U-Net experiments.
 
-## Required import
+## Required first cells
 
-Run model scripts from the repository root and import:
+Place these cells at the beginning of every model notebook:
 
 ```python
-from shared.preprocessing import get_dataloaders
+from pathlib import Path
+from IPython import get_ipython
+
+preprocessing_notebook = Path("shared/preprocessing.ipynb")
+if not preprocessing_notebook.exists():
+    preprocessing_notebook = Path("../shared/preprocessing.ipynb")
+
+get_ipython().run_line_magic("run", str(preprocessing_notebook))
 ```
 
-Do not parse TFRecords, create a second dataset class, split the data, or calculate normalization statistics inside a model folder.
+Run the model notebook from the repository root or from the `models/` folder. The shared notebook creates `train_loader`, `val_loader`, `test_loader`, and `pos_weight` in the model notebook's namespace. Do not parse TFRecords, create a second dataset class, split the data, or calculate normalization statistics inside a model notebook.
 
 ## Build the loaders
 
 ```python
 import torch
-from shared.preprocessing import get_dataloaders
-
-train_loader, val_loader, test_loader, pos_weight = get_dataloaders(
-    data_dir="data",
-    batch_size=32,
-    augment_train=True,
-    num_workers=0,
-)
 
 criterion = torch.nn.BCEWithLogitsLoss(
     pos_weight=torch.tensor(pos_weight, dtype=torch.float32)
@@ -77,13 +76,13 @@ _, val_targets, val_mask = next(iter(val_loader))
 _, test_targets, test_mask = next(iter(test_loader))
 ```
 
-All four models must use the same batch size, preprocessing module, split files, normalization statistics, mask handling, and evaluation rules. Only the architecture and its explicitly reported hyperparameters should differ.
+All four models must use the same batch size, preprocessing notebook, split files, normalization statistics, mask handling, and evaluation rules. Only the architecture and its explicitly reported hyperparameters should differ.
 
 ## Dataset location
 
 Place the downloaded TFRecord files directly in `data/`. The filenames must contain `train`, `eval`, and `test` so `get_dataloaders()` can find each split.
 
-The loader computes normalization statistics from the training split and stores them in `shared/normalization_stats.json`. Do not delete or replace this file between model runs unless the dataset changes.
+The notebook computes normalization statistics from the training split and stores them in `shared/normalization_stats.json`. Do not delete or replace this file between model runs unless the dataset changes.
 
 ## Minimal smoke test
 
