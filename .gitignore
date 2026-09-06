@@ -1,0 +1,28 @@
+# Downloaded dataset and archives
+data/
+
+# Python caches and local environments
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+
+# Experiment outputs
+checkpoints/
+*.pt
+*.pth
+*.ckpt
+results/
+runs/
+
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+kaggle.json
+
+# Jupyter and tooling
+.ipynb_checkpoints/
+.vscode/

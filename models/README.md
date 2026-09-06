@@ -1,0 +1,98 @@
+# Model Implementation Instructions
+
+Each model must use the shared preprocessing pipeline. This keeps the train, validation, and test data identical across the CNN, U-Net, ResNet-UNet, and Attention U-Net experiments.
+
+## Required import
+
+Run model scripts from the repository root and import:
+
+```python
+from shared.preprocessing import get_dataloaders
+```
+
+Do not parse TFRecords, create a second dataset class, split the data, or calculate normalization statistics inside a model folder.
+
+## Build the loaders
+
+```python
+import torch
+from shared.preprocessing import get_dataloaders
+
+train_loader, val_loader, test_loader, pos_weight = get_dataloaders(
+    data_dir="data",
+    batch_size=32,
+    augment_train=True,
+    num_workers=0,
+)
+
+criterion = torch.nn.BCEWithLogitsLoss(
+    pos_weight=torch.tensor(pos_weight, dtype=torch.float32)
+)
+```
+
+`num_workers=0` is recommended on Windows while developing. It can be increased after the data pipeline works reliably.
+
+## Batch contract
+
+Each loader yields `(inputs, targets, valid_mask)`:
+
+- `inputs`: float32 tensor with shape `(B, 12, 64, 64)`
+- `targets`: float32 tensor with shape `(B, 1, 64, 64)`; values are `0`, `1`, or `-1`
+- `valid_mask`: float32 tensor with shape `(B, 1, 64, 64)`; `1` means a valid target and `0` means uncertain (`-1`)
+
+The model must return logits with shape `(B, 1, 64, 64)`.
+
+## Masked training loss
+
+Uncertain target pixels must not affect training. Use the shared `pos_weight` and apply `valid_mask` to the unreduced loss:
+
+```python
+criterion = torch.nn.BCEWithLogitsLoss(
+    pos_weight=torch.tensor(pos_weight, device=device),
+    reduction="none",
+)
+
+for inputs, targets, valid_mask in train_loader:
+    inputs = inputs.to(device)
+    targets = targets.to(device)
+    valid_mask = valid_mask.to(device)
+
+    logits = model(inputs)
+    pixel_loss = criterion(logits, targets.clamp(0, 1))
+    loss = (pixel_loss * valid_mask).sum() / valid_mask.sum().clamp_min(1.0)
+
+    optimizer.zero_grad()
+    loss.backward()
+    optimizer.step()
+```
+
+Do not use the `-1` target value directly in BCE. Clamp it only after retaining `valid_mask`, as shown above.
+
+## Validation and testing
+
+Use `val_loader` for model selection and `test_loader` only for the final report. Apply `valid_mask` to every pixel-level loss or metric in both phases. Do not augment validation or test data:
+
+```python
+_, val_targets, val_mask = next(iter(val_loader))
+_, test_targets, test_mask = next(iter(test_loader))
+```
+
+All four models must use the same batch size, preprocessing module, split files, normalization statistics, mask handling, and evaluation rules. Only the architecture and its explicitly reported hyperparameters should differ.
+
+## Dataset location
+
+Place the downloaded TFRecord files directly in `data/`. The filenames must contain `train`, `eval`, and `test` so `get_dataloaders()` can find each split.
+
+The loader computes normalization statistics from the training split and stores them in `shared/normalization_stats.json`. Do not delete or replace this file between model runs unless the dataset changes.
+
+## Minimal smoke test
+
+Before training, verify the loader and model output:
+
+```python
+x, y, mask = next(iter(train_loader))
+assert x.shape[1:] == (12, 64, 64)
+assert y.shape[1:] == (1, 64, 64)
+assert mask.shape == y.shape
+assert torch.isfinite(x).all()
+```
