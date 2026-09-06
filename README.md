@@ -106,7 +106,6 @@ wildfire-prediction/
 │   ├── unet                   # Member 2
 │   ├── resnet_unet            # Member 3
 │   └── attention_unet         # Member 4
-├── results/                   # saved metrics/configs per model
 ├── requirment.txt             # Python dependencies
 └── README.md
 ```

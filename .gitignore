@@ -1,5 +1,6 @@
 # Downloaded dataset and archives
-data/
+data/*
+!data/.gitkeep
 
 # Python caches and local environments
 __pycache__/
