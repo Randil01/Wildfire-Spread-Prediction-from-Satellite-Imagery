@@ -2,6 +2,13 @@
 
 Each model notebook must use the shared preprocessing notebook. This keeps the train, validation, and test data identical across the CNN, U-Net, ResNet-UNet, and Attention U-Net experiments.
 
+The four required model notebooks are:
+
+- `cnn_baseline.ipynb` — CNN baseline
+- `unet.ipynb` — U-Net
+- `resnet_unet.ipynb` — ResNet-UNet
+- `attention_unet.ipynb` — Attention U-Net
+
 ## Required first cells
 
 Place these cells at the beginning of every model notebook:
@@ -18,6 +25,24 @@ get_ipython().run_line_magic("run", str(preprocessing_notebook))
 ```
 
 Run the model notebook from the repository root or from the `models/` folder. The shared notebook creates `train_loader`, `val_loader`, `test_loader`, and `pos_weight` in the model notebook's namespace. Do not parse TFRecords, create a second dataset class, split the data, or calculate normalization statistics inside a model notebook.
+
+After training, every model notebook must run the shared evaluator:
+
+```python
+%run ../shared/evaluate.ipynb
+
+results = evaluate_model(
+    model,
+    test_loader,
+    device,
+    model_name="cnn_baseline",  # change for your model
+    training_time_sec=elapsed_time,
+    num_params=sum(parameter.numel() for parameter in model.parameters()),
+)
+save_results(results, "../results/cnn_baseline_metrics.json")
+```
+
+Use `val_loader` for checkpoint and hyperparameter decisions. Use `test_loader` only once for the final report evaluation.
 
 ## Build the loaders
 

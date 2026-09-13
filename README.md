@@ -2,18 +2,20 @@
 
 Predicting next-day wildfire spread as a pixel-wise binary segmentation task, using four deep-learning architectures trained and evaluated under identical, fair experimental conditions.
 
-## Team
-
-| Member | Model | Registration No. |
-|---|---|---|
-| TBD | Plain CNN Baseline | |
-| TBD | U-Net | |
-| TBD | ResNet-UNet (Transfer Learning) | |
-| TBD | Attention U-Net | |
-
 ## Problem statement
 
 Given a stack of environmental and remote-sensing feature layers for a region on day *t*, predict the binary fire mask for day *t + 1*. Every model in this repo solves the exact same task with the exact same input/output shapes, so results are directly comparable.
+
+## Assignment-aligned model plan
+
+This is a supervised deep-learning segmentation project. The four required architectures are:
+
+1. CNN Baseline — implemented in `models/cnn_baseline.ipynb`
+2. U-Net — implemented in `models/unet.ipynb`
+3. ResNet-UNet — implemented in `models/resnet_unet.ipynb`
+4. Attention U-Net — implemented in `models/attention_unet.ipynb`
+
+All four notebooks must use [shared/preprocessing.ipynb](shared/preprocessing.ipynb) and [shared/evaluate.ipynb](shared/evaluate.ipynb). Architecture code, training configuration, and model-specific experiments belong in the respective model notebook. Dataset parsing, splitting, normalization, uncertain-label masking, shared metrics, and cross-model comparison must not be reimplemented separately.
 
 ## Dataset
 
@@ -90,6 +92,8 @@ parsed_dataset = raw_dataset.map(parse_fn)
 
 The shared `shared/preprocessing.ipynb` notebook wraps this into ready-to-use PyTorch `DataLoader` objects with the fixed train/val/test split, normalization, NaN handling, augmentation, and class-imbalance weight already applied. Every model notebook must run this shared notebook rather than writing its own loader. See [models/README.md](models/README.md) for the model implementation contract.
 
+The shared `shared/evaluate.ipynb` notebook provides common metrics, visualizations, saved result format, and final comparison. Every member must use it for model evaluation so the comparison is fair.
+
 ## Repo structure
 
 ```
@@ -97,6 +101,7 @@ wildfire-prediction/
 ├── data                       # downloaded TFRecords (gitignored)
 ├── shared/
 │   ├── preprocessing.ipynb     # shared Dataset/DataLoader and preprocessing
+│   ├── evaluate.ipynb           # shared metrics, plots, and model comparison
 │   └── normalization_stats.json # shared training-set statistics
 ├── models/
 │   ├── README.md              # model implementation instructions
@@ -113,5 +118,10 @@ wildfire-prediction/
 ```bash
 git clone <repo-url>
 cd wildfire-prediction
-pip install -r requirment.txt --break-system-packages
+python -m venv .venv
+\.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+python -m pip install -r requirment.txt
 ```
+
+In VS Code, select the Jupyter kernel **Wildfire Spread (.venv)** before running the notebooks. The dataset files must be in `data/`, and the model notebooks should be run from top to bottom.
