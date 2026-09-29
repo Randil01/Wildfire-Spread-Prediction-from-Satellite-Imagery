@@ -10,6 +10,11 @@ __pycache__/
 venv/
 env/
 
+# Local experiment notebooks
+/models/attention_unet_lr_1e-4.ipynb
+/models/attention_unet_bce_dice.ipynb
+/models/attention_unet_dropout_025.ipynb
+
 # Experiment outputs
 checkpoints/
 *.pt
