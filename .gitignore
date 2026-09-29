@@ -27,3 +27,6 @@ kaggle.json
 # Jupyter and tooling
 .ipynb_checkpoints/
 .vscode/
+
+results/resnet_unet_best.pt
+.DS_Store
